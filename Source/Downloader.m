@@ -13,7 +13,7 @@
 
 - (Downloader*) init:(AppController*)theController {
   if (self = [super init]) {
-    controller = [theController retain];
+    controller = theController;
     NSError* error;
     if (![[NSFileManager defaultManager] createDirectoryAtPath:[controller temporaryDirectory] withIntermediateDirectories:YES attributes:nil error:&error])
       [NSApp presentError:error];
@@ -29,18 +29,15 @@
   return self;
 }
 
-- (void) dealloc {
-  [controller release];
-  [super dealloc];
-}
+
 
 - (void) downloadDidFinish:(NSURLDownload*)download {
-  [download release];
+ 
   [controller notifyDownloadFinished];
 }
 
 - (void) download:(NSURLDownload*)download didFailWithError:(NSError*)error {
-  [download release];
+  
   [controller notifyDownloadFailed:error];
 }
 

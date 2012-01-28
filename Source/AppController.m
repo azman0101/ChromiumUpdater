@@ -20,7 +20,7 @@
 - (void) awakeFromNib {
   autoUpdateRunning = NO;
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(taskFinished:) name:NSTaskDidTerminateNotification object:nil];
-  ChangeCell* cell = [[[ChangeCell alloc] init] autorelease];
+  ChangeCell* cell = [[ChangeCell alloc] init];
   [[tblChanges tableColumnWithIdentifier:@"Changes"] setDataCell:cell];
   log = [[ChangeLog alloc] initWithTableView:tblChanges];
   [lblHint setStringValue:[NSString stringWithFormat:[lblHint stringValue], [self localApp]]];
@@ -31,13 +31,6 @@
   return YES;
 }
 
-- (void) dealloc {
-  [localChromium release];
-  [remoteChromium release];
-  [downloader release];
-  [log release];
-  [super dealloc];
-}
 
 #pragma mark Functions returning paths and urls
 
@@ -60,7 +53,7 @@
     OSErr err = FSFindFolder(kSystemDomain, kApplicationsFolderType, false, &folder);
     if (err == noErr) {
       CFURLRef url = CFURLCreateFromFSRef(kCFAllocatorDefault, &folder);
-      path = [(NSURL *)url path];
+      path = [(__bridge NSURL *)url path];
       CFRelease(url);
     }
     return path ? [path stringByAppendingString:@"/Chromium.app"] : path;
@@ -100,17 +93,17 @@
 #pragma mark Refresh functions
 
 - (void) doRefresh {
-  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+  @autoreleasepool {
   [lblInfo setStringValue:@"refreshing..."];
   [progressStartup setHidden:NO];
   [progressStartup startAnimation:nil];
 
-  [localChromium release];
-  localChromium = [[self detectLocalChromium] retain];
+  
+  localChromium = [self detectLocalChromium];
   [lblLocalVersion setStringValue:localChromium ? localChromium : @"Not installed!"];
 
-  [remoteChromium release];
-  remoteChromium = [[self detectRemoteChromium] retain];
+  
+  remoteChromium = [self detectRemoteChromium];
   [lblRemoteVersion setStringValue:remoteChromium ? remoteChromium : @"Unable to detect!"];
 
   if (localChromium && remoteChromium) {
@@ -118,7 +111,7 @@
     [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
     NSNumber * localChromiumNum = [formatter numberFromString:localChromium];
     NSNumber * remoteChromiumNum = [formatter numberFromString:remoteChromium];
-    [formatter release];
+    
 
     NSComparisonResult res = [localChromiumNum compare:remoteChromiumNum];
     switch (res) {
@@ -150,7 +143,7 @@
     [progressStartup setHidden:YES];
   }
 
-  [pool release];
+  }
 }
 
 - (IBAction) fetchChanges:(id)sender {
@@ -158,7 +151,7 @@
 }
 
 - (void) doFetchChanges {
-  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+@autoreleasepool {
   [progressStartup setHidden:NO];
   [progressStartup startAnimation:nil];
   [btnFetchChanges setEnabled:NO];
@@ -167,7 +160,7 @@
   [btnFetchChanges setHidden:!someLeft];
   [progressStartup stopAnimation:nil];
   [progressStartup setHidden:YES];
-  [pool release];
+  }
 }
 
 #pragma mark Update functions
@@ -175,7 +168,7 @@
 - (IBAction) update:(id)sender {
   [btnUpdate setHidden:YES];
   [progressUpdate setHidden:NO];
-  [downloader release];
+ 
   downloader = [[Downloader alloc] init:self];
 }
 
@@ -190,7 +183,7 @@
   NSArray* arguments = [NSArray arrayWithObjects:@"-qq", [self temporaryFile], nil];
   [task setArguments:arguments];
   [task launch];
-  [task release];
+ 
 }
 
 - (void) notifyDownloadFailed:(NSError*)error {

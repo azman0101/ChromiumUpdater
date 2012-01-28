@@ -14,7 +14,7 @@
 
 - (Change*) initFromEntry:(NSXMLElement*)someEntry width:(CGFloat)someWidth {
   if (self = [super init]) {
-    entry = [someEntry retain];
+    entry = someEntry;
     width = someWidth;
     revision = [[entry attributeForName:@"revision"] stringValue];
     for (NSXMLElement* child in [entry children]) {
@@ -44,13 +44,10 @@
   return self;
 }
 
-- (void) dealloc {
-  [entry release];
-  [super dealloc];
-}
+
 
 + (Change*) changeFromEntry:(NSXMLElement*)someEntry width:(CGFloat)someWidth {
-  return [[[Change alloc] initFromEntry:someEntry width:someWidth] autorelease];
+  return [[Change alloc] initFromEntry:someEntry width:someWidth];
 }
 
 // NSCell creates a copy of our object, so we need to implement the NSCopying protocol

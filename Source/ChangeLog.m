@@ -16,18 +16,11 @@
   if (self = [super init]) {
     changes = [[NSMutableArray alloc] init];
     revisions = [[NSMutableSet alloc] init];
-    tableView = [someTableView retain];
+    tableView = someTableView;
     [tableView setDataSource:self];
     [tableView setDelegate:self];
   }
   return self;
-}
-
-- (void) dealloc {
-  [tableView release];
-  [revisions release];
-  [changes release];
-  [super dealloc];
 }
 
 #pragma mark Changes fetching functions
@@ -49,7 +42,6 @@
         [changes addObject:c];
         [revisions addObject:[NSNumber numberWithInteger:[[c revision] integerValue]]];
       }
-      [doc release];
       [tableView reloadData];
     }
   }
